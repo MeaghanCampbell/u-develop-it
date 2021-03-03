@@ -3,6 +3,9 @@ const express = require('express');
 // verbose sets execution mode and can help explain what the app is doing
 const sqlite3 = require('sqlite3').verbose()
 
+// use this function
+const inputCheck = require('./utils/inputCheck')
+
 // add port designation and app expression
 const PORT = process.env.PORT || 3001;
 const app = express()
@@ -63,6 +66,33 @@ app.get('/api/candidate/:id', (req, res) => {
     });
 });
 
+// api endpoint to create a candidate (post)
+// using destructuring to pull body property out of request object
+app.post('/api/candidate', ({ body }, res) => {
+    const errors = inputCheck(body, 'first_name', 'last_name', 'industry_connected');
+    if (errors) {
+      res.status(400).json({ error: errors });
+      return;
+    }
+  
+    const sql =  `INSERT INTO candidates (first_name, last_name, industry_connected) 
+                  VALUES (?,?,?)`;
+    const params = [body.first_name, body.last_name, body.industry_connected];
+    // ES5 function, not arrow function, to use this
+    db.run(sql, params, function(err, result) {
+      if (err) {
+        res.status(400).json({ error: err.message });
+        return;
+      }
+  
+      res.json({
+        message: 'success',
+        data: body,
+        id: this.lastID
+      });
+    });
+});
+
 // API endpoint to delete candidate
 // test using insomnia
 app.delete('/api/candidate/:id', (req, res) => {
@@ -80,8 +110,6 @@ app.delete('/api/candidate/:id', (req, res) => {
       });
     });
 });
-  
-
 
 // response for any other request not found catch all - this needs to be last
 app.use((req, res) => {
