@@ -2,6 +2,7 @@
   "name": "u-develop-it",
   "version": "1.0.0",
   "main": "index.js",
+  
   "scripts": {
     "test": "jest",
     "migrate": "sqlite3 db/election.db < db/schema.sql",
