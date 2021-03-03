@@ -25,8 +25,13 @@ const db = new sqlite3.Database('./db/election.db', err => {
 // GET all candidates at api endpoint (url)
 // created so the front end team can loop and parse this object to display a list of candidates
 app.get('/api/candidates', (req, res) => {
-    // SQL statement is assigned to variable, params is empty array becuase there are no placeholders in SQL statement
-    const sql = `SELECT * FROM candidates`;
+    // SQL statement is assigned to variable with sql syntax to executd
+    const sql = `SELECT candidates.*, parties.name 
+             AS party_name 
+             FROM candidates 
+             LEFT JOIN parties 
+             ON candidates.party_id = parties.id`;
+    // params is empty array becuase there are no placeholders in SQL statement
     const params = [];
     // all method  to get all rows from db - 500 means server error
     db.all(sql, params, (err, rows) => {
@@ -47,8 +52,12 @@ app.get('/api/candidates', (req, res) => {
 // API endpoint to get a single candidate
 // endpoint has a route parameter that will hold value of ID
 app.get('/api/candidate/:id', (req, res) => {
-    const sql = `SELECT * FROM candidates 
-                 WHERE id = ?`;
+    const sql = `SELECT candidates.*, parties.name 
+                AS party_name 
+                FROM candidates 
+                LEFT JOIN parties 
+                ON candidates.party_id = parties.id 
+                WHERE candidates.id = ?`;
     // assign captured value populated in req.params object with the key id to params
     // it;s an array with a single element
     const params = [req.params.id];
